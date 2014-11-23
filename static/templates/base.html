@@ -23,13 +23,28 @@
   </head>
 
   <body>
+    {% if user.is_authenticated %}
+        <div id="sidebar-wrapper">
+            <ul class="sidebar-nav">
+                <li class="sidebar-brand" ><a class="alert-link" href=""><i>Logged in as: {{request.user.username}}</i></a></li>
+                <li><a href="logout">Logout</a></li>
+                <li><a href="/">Home</a></li>
+            </ul>
+        </div>
+    {% else %}
+      <div id="sidebar-wrapper">
+          <ul class="sidebar-nav">
+            <li class="sidebar-brand"><a href="login">Login</a>
+            <li class="sidebar-brand"><a href="register">Register</a>
+          </ul>
+      </div>
+    {% endif %}
 
     <div class="container">
-
     {% block content %}
     
     {% endblock %}
-    </div> <!-- /container -->
+    </div>
   </body>
 </html>
 
