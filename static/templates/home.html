@@ -1,10 +1,15 @@
 {% extends 'base.html' %}
     
 {% block content %}
-    <div class="page-header">
-        <h1>Start <br>
-            <small>Super Twitter chat !</small>
-        </h1>
+    <div id="friends-list" class="panel panel-info">
+      <div class="panel-heading">
+        <h3 class="panel-title">Friends list</h3>
+      </div>
+      <div class="list-group">
+        {% for key, value in users.items %}
+        <a href="#" class="list-group-item">{{value}}</a>
+        {% endfor %}
+      </div>
     </div>
 {% endblock %}
   
