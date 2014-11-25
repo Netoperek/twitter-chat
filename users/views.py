@@ -64,7 +64,19 @@ def request_token_to_access(oauth_token, oauth_verifier, access_token):
     access_token = dict(urlparse.parse_qsl(response.content))
     return access_token
 
+def user_exists(screen_name):
+    chat_users =  Chat_user.objects.all()
+    print chat_users
+    for x in chat_users:
+        print x
+
+
 def home(request):
+
+    # If login by twitter was not performed go back to login page
+    #
+    if 'auth' not in request.session: 
+        return HttpResponseRedirect("login")
 
     access_token = request.session['auth']
 
@@ -85,7 +97,7 @@ def home(request):
 
     # If login by twitter was not performed go back to login page
     #
-    if 'oauth_token' not in access_token: 
+    if 'oauth_token' not in access_token:
         return HttpResponseRedirect("login")
 
     token = oauth.Token(access_token['oauth_token'], access_token['oauth_token_secret'])
@@ -99,6 +111,7 @@ def home(request):
     # Getting screen_name and friends list
     #
     screen_name = json.loads(response.content)['screen_name']
+    user_exists(screen_name)
     #users = get_users_dict(screen_name)
 
     # For testing if twitter api requests are more then 100
