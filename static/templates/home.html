@@ -1,15 +1,8 @@
 {% extends 'base.html' %}
     
 {% block content %}
-    <div id="friends-list" class="panel panel-info">
-      <div class="panel-heading">
-        <h3 class="panel-title">Friends list</h3>
-      </div>
-      <div class="list-group">
-        {% for key, value in users.items %}
-        <a href="#" class="list-group-item">{{value}}</a>
-        {% endfor %}
-      </div>
-    </div>
+
+    <div id="login-info" class="alert alert-success" role="alert">Well done ! You properly logged in by your twitter account. Press create to create same user in our system.</div>
+
 {% endblock %}
   
