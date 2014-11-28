@@ -14,4 +14,8 @@ urlpatterns = patterns('',
     # authentication
     #
     url(r'^login$', 'users.views.login_user', name='login'),
+
+    # chat page
+    #
+    url(r'^chat$', 'chat.views.chat', name='chat'),
 )

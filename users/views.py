@@ -1,4 +1,5 @@
 from django.shortcuts import render, render_to_response, RequestContext
+from django.contrib.auth.models import User
 from requests_oauthlib import OAuth1
 from django.contrib.auth.forms import UserCreationForm
 from django.http import HttpResponseRedirect, HttpRequest, HttpResponse
@@ -65,11 +66,19 @@ def request_token_to_access(oauth_token, oauth_verifier, access_token):
     return access_token
 
 def user_exists(screen_name):
-    chat_users =  Chat_user.objects.all()
-    print chat_users
-    for x in chat_users:
-        print x
+    chat_user =  User.objects.filter(username = screen_name)
+    print screen_name
+    if chat_user:
+        return True
+    return False
 
+def create_user(screen_name, password):
+    django_user = User.objects.create_user(
+        username = screen_name,
+        password = password)
+    django_user.save()
+    chat_user = Chat_user(user = django_user)
+    chat_user.save()
 
 def home(request):
 
@@ -77,8 +86,6 @@ def home(request):
     #
     if 'auth' not in request.session: 
         return HttpResponseRedirect("login")
-
-    access_token = request.session['auth']
 
     # Getting oauth_token & oauth_verifier from request
     #
@@ -106,25 +113,30 @@ def home(request):
 
     response = requests.get(url, headers=oauth_request.to_header())
     if response.status_code != 200:
-      raise Exception("Twitter api did not authenticated correctly")
+        reason = str(response.content)
+        raise Exception("Twitter api did not authenticated correctly, reason: " + reason)
 
-    # Getting screen_name and friends list
-    #
     screen_name = json.loads(response.content)['screen_name']
-    user_exists(screen_name)
-    #users = get_users_dict(screen_name)
+    request.session['screen_name'] = screen_name
 
-    # For testing if twitter api requests are more then 100
-    #
-    #users = { '1' : 'Piorek', '2' : 'Tomek', '3' : 'ktos' }
+    exists = user_exists(screen_name) 
+    context = RequestContext(request)
+    if request.POST.get("create_user", ""):
+        password = request.POST['password']
+        user = create_user(screen_name, password)
+	user = authenticate(username = screen_name, password = password)
+	login(request, user)
+        return HttpResponseRedirect("chat")
+    elif request.POST.get("login", ""): 
+        password = request.POST['password']
+	user = authenticate(username = screen_name, password = password)
+        login(request, user)
+        return HttpResponseRedirect("chat")
+
     return render_to_response("home.html",
                                 locals(),
                                 context_instance=RequestContext(request))
 
-def invalidLogin(request):
-    return render_to_response("invalidLogin.html",
-			        locals(),
-			        context_instance=RequestContext(request))
 @login_required
 def logout_user(request):
     logout(request)

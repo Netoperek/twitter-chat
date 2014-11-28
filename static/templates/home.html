@@ -2,7 +2,30 @@
     
 {% block content %}
 
-    <div id="login-info" class="alert alert-success" role="alert">Well done ! You properly logged in by your twitter account. Press create to create same user in our system.</div>
+    {% if exists %}
+      <div id="login-info" class="alert alert-success" role="alert">
+        Well done ! You properly logged in by your twitter account. Your account is already in Tchat ! Press the button to enter the chat.
+      </div>
+      <form action="" method="POST"> 
+          {% csrf_token %}
+          <p> Your password </p>
+          <input type="password" name="password" value="" size="20" />
+          </br>
+          </br>
+          <input type="submit" value="Login and proceed!" name="login" class="btn btn-primary">
+      </form>
+    {% else %}
+      <div id="login-info" class="alert alert-success" role="alert">
+        Well done ! You properly logged in by your twitter account. Press create to create same user in our system.
+      </div>
+      <form action="" method="POST"> 
+          {% csrf_token %}
+          <p> Your password </p>
+          <input type="password" name="password" value="" size="20" />
+          </br></br>
+          <input type="submit" value="Create user!" name="create_user" class="btn btn-primary">
+      </form>
+     {% endif %}
 
 {% endblock %}
   
