@@ -87,6 +87,8 @@ def home(request):
     if 'auth' not in request.session: 
         return HttpResponseRedirect("login")
 
+    access_token = request.session['auth']
+
     # Getting oauth_token & oauth_verifier from request
     #
     oauth_token = request.GET.get("oauth_token", "") 
