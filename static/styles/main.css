@@ -1,3 +1,28 @@
-#login-info{
+#login-info {
   margin-top: 20px;
+}
+
+#msg-area {
+  height:500px;
+  overflow-y:scroll;
+}
+
+#chat-panel {
+  margin-top: 20px;
+  float: left;
+  width: 510px;
+  height: 520px;
+}
+
+textarea {
+  margin: 5px;
+}
+
+#msg-panel {
+  width: 509px;
+  height: 400px;
+}
+
+#send-btn {
+  height: 55px;
 }

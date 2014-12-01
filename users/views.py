@@ -6,7 +6,7 @@ from django.http import HttpResponseRedirect, HttpRequest, HttpResponse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from users.models import Chat_user
-from  main.twitter_data import CONSUMER_KEY, CONSUMER_SECRET
+from  main.twitter_data import CONSUMER_KEY, CONSUMER_SECRET, TWITTER_AUTH, ATOKEN, ASECRET
 import json
 import requests
 import oauth2 as oauth
@@ -17,11 +17,8 @@ import urlparse
 # It is saved in main/twitter_data.py and imported here
 #
 consumer = oauth.Consumer(CONSUMER_KEY, CONSUMER_SECRET)
-client = oauth.Client(consumer)
-client.add_certificate
 
 request_token_url = 'https://api.twitter.com/oauth/request_token'
-authorize_url = 'https://api.twitter.com/oauth/authorize'
 callback_url = 'https://127.0.0.1:8000/home'
 
 # Implementation of 3-legged twitter authorization
@@ -29,20 +26,27 @@ callback_url = 'https://127.0.0.1:8000/home'
 def sign_in_by_twitter(request):
     # Obtaining a request token
     #
+
+    access_token = {'oauth_token_secret': ATOKEN, 'oauth_token': ASECRET, 'oauth_callback_confirmed': 'true'}
+    token = oauth.Token(access_token['oauth_token'], access_token['oauth_token_secret'])
     oauth_request = oauth.Request.from_consumer_and_token(
             consumer, \
-            http_url=request_token_url, \
+            http_url = request_token_url, \
             parameters = {'oauth_callback':callback_url})
     oauth_request.sign_request(oauth.SignatureMethod_HMAC_SHA1(), consumer, None)
-    response = requests.get(request_token_url, headers=oauth_request.to_header(), verify=True)
+    response = requests.get(request_token_url, headers = oauth_request.to_header(), verify = True)
     request_token = dict(urlparse.parse_qsl(response.content))
+    print "KURWA"
+    print request_token
+    print response.status_code
+    print response.content
 
     # Saving request_token in session
     #
     request.session['auth'] = request_token
 
     # Redirect to twitter authorization page
-    # Get will containt new oauth_token & oauth_verifier
+    # Get will content new oauth_token & oauth_verifier
     #
     url = 'https://api.twitter.com/oauth/authorize?oauth_token=%s' % request_token['oauth_token']
     return HttpResponseRedirect(url)

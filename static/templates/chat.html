@@ -6,11 +6,59 @@
       <div class="panel-heading">
         <h3 class="panel-title">Friends list</h3>
       </div>
-      <div class="list-group">
+      <div class="btn-group-vertical" role="group" aria-label="...">
         {% for key, value in friends_dict.items %}
-        <a href="#" class="list-group-item">{{value}}</a>
+          <form action="" method="POST">
+            {% csrf_token %}
+            <input id="friend-button" type="submit" value="{{value}}" name="add_to_chat" class="btn btn-default">
+            <input hidden type="text" value = "{{key}}" name="id"/>
+          </form>
         {% endfor %}
       </div>
     </div>
+
+    <div id="chat-list" class="panel panel-info">
+      <div class="panel-heading">
+        <h3 class="panel-title">Chat list</h3>
+      </div>
+      <div class="btn-group-vertical" role="group" aria-label="...">
+        {% for key, value in chat_dict.items %}
+          <form action="" method="POST">
+            {% csrf_token %}
+            <input id="friend-button" type="submit" value="{{value}}" name="add_to_chat" class="btn btn-default">
+            <input hidden type="text" value = "{{key}}" name="id"/>
+          </form>
+        {% endfor %}
+      </div>
+      <form action="" method="POST">
+        {% csrf_token %}
+        <input id="create_chat" type="submit" value="Create Chat" name="create_chat" class="btn btn-success">
+      </form>
+
+    </div>
+
+    {% if show %}
+    <div id="chat-panel" class="panel panel-info">
+      <div class="panel-heading">
+        <h3 class="panel-title">Chat</h3>
+      </div>
+      <div id="msg-panel" class="panel panel-success">
+        <div class="panel-heading">
+          <h3 class="panel-title">Messages</h3>
+        </div>
+      </div>
+      <div id="chat-area">
+        <form action="" method="POST"> 
+        {% csrf_token %}
+          <div id="input-msg-area">
+            <textarea type="text" name="msg" rows="2" cols="50">
+            </textarea>
+            <input hidden type="text" value = "{{key}}" name="id"/>
+            <input id="send-btn" type="submit" value="Send" name="send" class="btn btn-primary">
+          </div>
+       </form>
+      </div>
+    </div>
+    {% endif %}
+
 {% endblock %}
-  

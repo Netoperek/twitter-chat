@@ -3,3 +3,22 @@
   width: 200px;
   margin-top: 20px;
 }
+
+#chat-list {
+  float: right;
+  width: 200px;
+  margin-top: 20px;
+  margin-right: 10px;
+}
+
+#friend-button {
+  width: 200px
+}
+
+#create_chat {
+  width: 200px
+}
+
+#chat-area {
+  margin-top: 20px;
+}
