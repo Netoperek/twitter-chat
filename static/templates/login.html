@@ -10,10 +10,11 @@
     <form id="login_form" method="post" action="login">
         {% csrf_token %}
         <b>Login:</b> <input type="text" name="username" value="" size="20" />
-        <br />
+        <br/>
         <b>Password:</b> <input type="password" name="password" value="" size="20" />
-        <br />
-
+        <br/>
+        <td><input type="radio" type="checkBox" name="set" value="set"</td>
+        <td><input type="radio" type="checkBox" name="set" value="unset"</td>
         <input type="submit" value="Login" class="btn btn-primary"/>
     </form>
 {% endblock %}

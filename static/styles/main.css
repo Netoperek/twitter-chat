@@ -3,15 +3,15 @@
 }
 
 #msg-area {
-  height:500px;
-  overflow-y:scroll;
+  height: 500px;
+  overflow-y: scroll;
 }
 
 #chat-panel {
-  margin-top: 20px;
   float: left;
+  margin-top: 20px;
   width: 510px;
-  height: 520px;
+  height: auto;
 }
 
 textarea {
@@ -26,3 +26,70 @@ textarea {
 #send-btn {
   height: 55px;
 }
+
+#close-chat {
+  margin: 5px;
+}
+
+#chat-name {
+  margin: 5px;
+  width: 188px;
+}
+
+#empty-chat-name {
+  margin-top: 20px;
+  width: 310px;
+}
+
+#not-unique-chat-name {
+  margin-top: 20px;
+  width: 310px;
+}
+
+#no-chatters {
+  margin-top: 20px;
+  width: 310px;
+}
+
+#chat-list {
+  float: right;
+  width: 200px;
+  margin-top: 20px;
+  margin-right: 10px;
+}
+
+#friend-button {
+  width: 200px
+}
+
+#room-button {
+  width: 200px
+}
+
+#create-chat {
+  width: 200px
+}
+
+#kill-chat {
+  width: 200px
+}
+
+#chat-area {
+  margin-top: 20px;
+}
+
+#friends-list {
+  float: right;
+  width: 200px;
+  margin-top: 20px;
+}
+
+#active-chat-rooms {
+  float: right;
+  width: 200px;
+  margin-top: 20px;
+  margin-right: 10px;
+}
+
+nav ul{height:355px; width:510;}
+nav ul{overflow:hidden; overflow-y:scroll;}

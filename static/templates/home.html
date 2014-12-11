@@ -22,8 +22,14 @@
           {% csrf_token %}
           <p> Your password </p>
           <input type="password" name="password" value="" size="20" />
+          <p> readonly </p>
+          <input type="radio" type="checkBox" name="role" value="set"/>
+          </br></br>
+          <p> all access </p>
+          <input type="radio" type="checkBox" name="role" value="unset"/>
           </br></br>
           <input type="submit" value="Create user!" name="create_user" class="btn btn-primary">
+          </br></br>
       </form>
      {% endif %}
 

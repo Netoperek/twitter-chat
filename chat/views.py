@@ -1,80 +1,98 @@
-from django.shortcuts import render, render_to_response, RequestContext
-from django.contrib.auth.decorators import login_required
+import time
+import tweepy
 import json
 import requests
 import oauth2 as oauth
-from  main.twitter_data import CONSUMER_KEY, CONSUMER_SECRET
+from django.http import HttpResponseRedirect, HttpRequest, HttpResponse
+from django.shortcuts import render, render_to_response, RequestContext
+from django.contrib.auth.decorators import login_required
+from main.twitter_data import CONSUMER_KEY, CONSUMER_SECRET
+from chat.models import ChatRoom
+from chat.models import Message
+from django.contrib.auth.models import User
+from users.models import Chat_user
 
-consumer = oauth.Consumer(CONSUMER_KEY, CONSUMER_SECRET)
-chat_dict_g = { }
-chat_dict = chat_dict_g
+def get_friends_dict(screen_name, api):
+    users = {}
+    for user in tweepy.Cursor(api.followers, screen_name = screen_name).items():
+        users[user.id_str] = user.screen_name
+    return users
 
-def create_friends_dict(friends_json):
-    friends_dict = { }
-    for user in friends_json['users']:
-        user_id = user['id']
-        user_name = user['name']
-        friends_dict[user_id] = user_name
-    return friends_dict
+def chat_name_unique(chat_name):
+    chat_name = ChatRoom.objects.filter(name = chat_name)
+    if chat_name:
+        return False
+    else:
+        return True
 
-def get_users_dict(screen_name, access_token):
-    url = 'https://api.twitter.com/1.1/followers/list.json?skip_statues=1&screen_name=' + screen_name
-    token = oauth.Token(access_token['oauth_token'], access_token['oauth_token_secret'])
-    oauth_request = oauth.Request.from_consumer_and_token(consumer, http_url = url)
-    oauth_request.sign_request(oauth.SignatureMethod_HMAC_SHA1(), consumer, token)
-    response = requests.get(url, headers = oauth_request.to_header())
+def get_chat_user(screen_name):
+    user = User.objects.filter(username = screen_name)
+    chat_user = Chat_user.objects.get(user = user)
+    return chat_user
 
-    if response.status_code != 200:
-      reason = str(response.content)
-      raise Exception("Twitter api did not return users list correctly, reason: " + reason)
+def close_chat(request, user):
+    user.chat_name = 'null'
+    user.chat_not_created = True
+    user.show_chat_panel = False
+    user.save()
 
-    friends_json = json.loads(response.content)
+def create_chat(request, user):
+    chat_name = request.POST.get('chat_name', '')
+    if len(chat_name.strip()) == 0:
+        user.show_wrong_chat_name_msg = True
+        user.save()
+    elif chat_name_unique(chat_name):
+        user.chat_name = chat_name
+        user.show_chat_panel = True
+        user.chat_not_created = False
+        user.save()
+        chat = ChatRoom(name = chat_name)
+        chat.save()
+    else:
+        user.show_wrong_chat_name_msg = True
+        user.save()
 
-    return create_friends_dict(friends_json)
+def go_to_room(request, user):
+    chat_name = request.POST.get('name', '')
+    user.chat_name = chat_name 
+    user.show_chat_panel = True
+    user.chat_not_created = False
+    user.save()
 
-def send_chat_request(screen_name, access_token):
-    url = 'https://api.twitter.com/1.1/account/settings?lang=en'
-    token = oauth.Token(access_token['oauth_token'], access_token['oauth_token_secret'])
-    oauth_request = oauth.Request.from_consumer_and_token(consumer, http_url = url)
-    oauth_request.sign_request(oauth.SignatureMethod_HMAC_SHA1(), consumer, token)
-    response = requests.post(url, headers = oauth_request.to_header())
-
-    if response.status_code != 200:
-      reason = str(response.content)
-      raise Exception("Direct message not send, reason: " + reason + " " + str(response.status_code))
-
-def invate_selected_users(access_token):
-    print chat_dict_g.values()
-    for value in chat_dict_g.values():
-        send_chat_request(value, access_token)
+def send(request, user):
+    text = request.POST.get('msg', '')
+    chat_room = ChatRoom.objects.get(name = user.chat_name)
+    msg = Message(room = chat_room, content = text, author = user.user.username)
+    msg.save()
 
 @login_required
 def chat(request):
-    show = False
-    access_token = request.session['token']
     screen_name = request.session['screen_name']
-    friends_dict = get_users_dict(screen_name, access_token)
+    user = get_chat_user(screen_name)
 
-    current_msg = ""
-    chat_dict = chat_dict_g
+    auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
+    auth.set_access_token(request.session['twitter_access_token_key'], request.session['twitter_access_token_secret'])
+    api = tweepy.API(auth_handler=auth)
 
-    if request.POST.get("add_to_chat", ""):
-        receiver_id = request.POST['id']
-        receiver_name = friends_dict.get(int(receiver_id))
-        if receiver_id in chat_dict:
-            chat_dict_g.pop(receiver_id, 0)
-        else:
-            chat_dict_g[receiver_id] = receiver_name
+    friends_dict = get_friends_dict(screen_name, api)
 
-    if request.POST.get("create_chat", ""):
-        show = True
-        invate_selected_users(access_token)
+    if Chat_user.objects.count() != 0:
+        in_chat = Chat_user.objects.filter(chat_name = user.chat_name) 
+        rooms = ChatRoom.objects.all()
+        messages = Message.objects.filter(room = in_chat)
 
-    if request.POST.get("send", ""):
-        show = True
-        msg = request.POST['msg']
-        receiver_id = request.POST['id']
+    if 'close_chat' in request.POST:
+        close_chat(request, user)
+
+    if 'create_chat' in request.POST:
+        create_chat(request, user)
+
+    if 'go_to_room' in request.POST:
+        go_to_room(request, user)
+
+    if 'send' in request.POST:
+        send(request, user)
 
     return render_to_response("chat.html",
-			        locals(),
-			        context_instance=RequestContext(request))
+                                locals(),
+                                context_instance=RequestContext(request))

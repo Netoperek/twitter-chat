@@ -8,10 +8,21 @@
       </div>
       <div class="btn-group-vertical" role="group" aria-label="...">
         {% for key, value in friends_dict.items %}
+            <input id="friend-button" type="submit" value="{{value}}" name="add_to_chat" class="btn btn-default">
+        {% endfor %}
+      </div>
+    </div>
+
+    <div id="active-chat-rooms" class="panel panel-info">
+      <div class="panel-heading">
+        <h3 class="panel-title">Active Chat Rooms</h3>
+      </div>
+      <div class="btn-group-vertical" role="group" aria-label="...">
+        {% for key in rooms %}
           <form action="" method="POST">
             {% csrf_token %}
-            <input id="friend-button" type="submit" value="{{value}}" name="add_to_chat" class="btn btn-default">
-            <input hidden type="text" value = "{{key}}" name="id"/>
+            <input id="room-button" type="submit" value="{{key.name}}" name="go_to_room" class="btn btn-default">
+            <input hidden type="text" value = "{{key.name}}" name="name"/>
           </form>
         {% endfor %}
       </div>
@@ -19,33 +30,39 @@
 
     <div id="chat-list" class="panel panel-info">
       <div class="panel-heading">
-        <h3 class="panel-title">Chat list</h3>
+        <h3 class="panel-title">In chat</h3>
       </div>
       <div class="btn-group-vertical" role="group" aria-label="...">
-        {% for key, value in chat_dict.items %}
-          <form action="" method="POST">
-            {% csrf_token %}
-            <input id="friend-button" type="submit" value="{{value}}" name="add_to_chat" class="btn btn-default">
-            <input hidden type="text" value = "{{key}}" name="id"/>
-          </form>
+        {% for key in in_chat %}
+          <input id="friend-button" type="submit" value="{{key.user.username}}" name="add_to_chat" class="btn btn-default">
         {% endfor %}
       </div>
       <form action="" method="POST">
         {% csrf_token %}
-        <input id="create_chat" type="submit" value="Create Chat" name="create_chat" class="btn btn-success">
+        {% if user.chat_not_created and not user.read_only %}
+        <input id="chat-name" name="chat_name" value="Chat Name" type="text" />
+        <input id="create-chat" type="submit" value="Create Chat" name="create_chat" class="btn btn-success"/>
+        {% endif %}
       </form>
 
     </div>
 
-    {% if show %}
+    {% if user.show_chat_panel %}
     <div id="chat-panel" class="panel panel-info">
       <div class="panel-heading">
-        <h3 class="panel-title">Chat</h3>
+        <h3 class="panel-title">Chat: {{user.chat_name}}</h3>
       </div>
       <div id="msg-panel" class="panel panel-success">
         <div class="panel-heading">
           <h3 class="panel-title">Messages</h3>
         </div>
+        <nav>
+          <ul>
+          {% for msg in messages %}
+          <li>{{msg.author}} : {{msg.content}} </li>
+          {% endfor %}
+          </ul>
+        </nav>
       </div>
       <div id="chat-area">
         <form action="" method="POST"> 
@@ -54,10 +71,25 @@
             <textarea type="text" name="msg" rows="2" cols="50">
             </textarea>
             <input hidden type="text" value = "{{key}}" name="id"/>
+            {% if not user.read_only %}
             <input id="send-btn" type="submit" value="Send" name="send" class="btn btn-primary">
+            {% endif %}
+            <input id="close-chat" type="submit" value="Close Chat" name="close_chat" class="btn btn-danger">
           </div>
        </form>
       </div>
+    </div>
+    {% endif %}
+
+    {% if user.show_empty_chat_name_msg %}
+    <div id="empty-chat-name" class="alert alert-success" role="alert">
+      Chat name cannot be empty
+    </div>
+    {% endif %}
+
+    {% if user.show_wrong_chat_name_msg %}
+    <div id="not-unique-chat-name" class="alert alert-success" role="alert">
+      Chat name must be unique
     </div>
     {% endif %}
 
